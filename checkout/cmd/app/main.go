@@ -39,13 +39,13 @@ func main() {
 	}
 
 	// services: loms: logistics
-	logistics := loms.New(config.ConfigData.Services.Loms, loms.PathStocks)
+	logistics := loms.New(config.ConfigData.Services.Loms, loms.PathToStocks)
 	if logistics == nil {
 		log.Fatal("failed to init logistics manager service")
 	}
 
 	// services: loms: order manager
-	orders := loms.New(config.ConfigData.Services.Loms, loms.PathCreateOrder)
+	orders := loms.New(config.ConfigData.Services.Loms, loms.PathToCreateOrder)
 	if orders == nil {
 		log.Fatal("failed to init order manager service")
 	}
@@ -57,7 +57,7 @@ func main() {
 	}
 
 	// business logic
-	checkoutModel := model.New(product, logistics, orders, stor)
+	checkoutModel := model.New(product, logistics, orders, stor, config.ConfigData)
 
 	// handlers: addToCart
 	addToCartHandler := addtocart.New(checkoutModel)
@@ -94,5 +94,4 @@ func main() {
 	log.Println(ListeningHTTP, port)
 	err = http.ListenAndServe(port, nil)
 	log.Fatal(UnableToListenHTTP, err)
-
 }

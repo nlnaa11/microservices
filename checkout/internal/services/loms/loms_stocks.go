@@ -12,20 +12,8 @@ import (
 )
 
 const (
-	PathStocks string = "/stocks"
+	PathToStocks string = "/stocks"
 )
-
-type Client struct {
-	url     string
-	urlGoal string
-}
-
-func New(url string, pathTo string) *Client {
-	return &Client{
-		url:     url,
-		urlGoal: url + pathTo,
-	}
-}
 
 type StocksRequest struct {
 	Sku uint32 `json:"sku"`
@@ -49,7 +37,7 @@ func (c *Client) Stocks(ctx context.Context, sku uint32) ([]model.Stock, error) 
 		return nil, errors.Wrap(err, "marshaling json")
 	}
 
-	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, c.urlGoal, bytes.NewBuffer(rawJSON))
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, c.url+PathToStocks, bytes.NewBuffer(rawJSON))
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http request")
 	}

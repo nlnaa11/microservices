@@ -11,8 +11,8 @@ var (
 )
 
 type Stock struct {
-	WarehouseId int64  `json:"warehouseId"`
-	Count       uint64 `json:"count"`
+	WarehouseId int64  //`json:"warehouseId"`
+	Count       uint64 //`json:"count"`
 }
 
 func (m *Model) AddToCart(ctx context.Context, user int64, sku uint32, count uint16) error {
@@ -23,7 +23,7 @@ func (m *Model) AddToCart(ctx context.Context, user int64, sku uint32, count uin
 
 	addToCart := func() {
 		item := m.createItem(sku, count)
-		m.stor.AddToCart(ctx, user, *item)
+		_ = m.stor.AddToCart(ctx, user, *item)
 	}
 
 	cnt := int64(count)
@@ -39,8 +39,8 @@ func (m *Model) AddToCart(ctx context.Context, user int64, sku uint32, count uin
 }
 
 type Item struct {
-	Sku   uint32 `json:"sku"`
-	Count uint16 `json:"count"`
+	Sku   uint32 //`json:"sku"`
+	Count uint16 //`json:"count"`
 }
 
 func (m *Model) createItem(sku uint32, count uint16) *Item {

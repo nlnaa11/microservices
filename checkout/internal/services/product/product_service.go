@@ -28,7 +28,8 @@ func New(url string, pathTo string) *Client {
 }
 
 type ProductRequest struct {
-	Sku uint32 `json:"sku"`
+	Token string `json:"token"`
+	Sku   uint32 `json:"sku"`
 }
 
 // подумать о запросе информации сразу о нескольких товарах
@@ -40,8 +41,11 @@ type ProductResponse struct {
 }
 
 // validations
-func (c *Client) GetProductInfo(ctx context.Context, sku uint32) (model.ItemInfo, error) {
-	request := ProductRequest{Sku: sku}
+func (c *Client) GetProductInfo(ctx context.Context, token string, sku uint32) (model.ItemInfo, error) {
+	request := ProductRequest{
+		Token: token,
+		Sku:   sku,
+	}
 
 	var productInfo model.ItemInfo
 

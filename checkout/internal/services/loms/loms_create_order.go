@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	PathCreateOrder string = "/order/create"
+	PathToCreateOrder string = "/createOrder"
 )
 
 type ItemInCart struct {

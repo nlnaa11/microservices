@@ -37,14 +37,16 @@ func (m *Model) ListCart(ctx context.Context, user int64) (*ListOfCart, error) {
 		return nil, ErrEmpryCart
 	}
 
+	token := m.tokenGetter.GetToken()
+
 	itemsInfo := make([]ItemInfo, len(cart.Items))
 	totalPrice := 0.0
 
 	for _, item := range cart.Items {
-		info, err := m.productInformator.GetProductInfo(ctx, item.Sku)
+		info, err := m.productInformator.GetProductInfo(ctx, token, item.Sku)
 		if err != nil {
 			log.Println(err)
-			err = m.stor.RemoveFromCart(ctx, user, item)
+			_ = m.stor.RemoveFromCart(ctx, user, item)
 			//updateCart = true
 			continue
 		}

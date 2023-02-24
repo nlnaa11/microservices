@@ -53,7 +53,12 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 
 	response.Items = make([]ItemInfo, 0, len(rawResponse.ItemsInfo))
 	for _, itemInfo := range rawResponse.ItemsInfo {
-		response.Items = append(response.Items, ItemInfo(itemInfo))
+		response.Items = append(response.Items, ItemInfo{
+			Sku:   itemInfo.Sku,
+			Count: itemInfo.Count,
+			Name:  itemInfo.Name,
+			Price: itemInfo.Price,
+		})
 	}
 	response.TotalPrice = rawResponse.TotalPrice
 

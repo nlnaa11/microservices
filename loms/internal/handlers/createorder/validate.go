@@ -1,4 +1,4 @@
-package listcart
+package createorder
 
 import (
 	"strconv"
@@ -6,27 +6,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-const MinimumCost = 1
-
 var (
-	ErrEmptyCart      = errors.New("empty cart")
+	ErrEmptyItems     = errors.New("empty items")
 	ErrEmptyItemCount = errors.New("empty count")
-	ErrEmptyItemName  = errors.New("empty name")
 	ErrEmptyItemSku   = errors.New("empty sku")
-	ErrEmptyPrice     = errors.New("empty price")
-	ErrEmptyUser      = errors.New("empty user")
+	ErrInvalidUser    = errors.New("invalid user")
 )
 
 func (r Request) Validate() error {
-	if r.User <= 0 {
-		return ErrEmptyUser
-	}
-	return nil
-}
-
-func (r Response) Validate() error {
 	if len(r.Items) < 1 {
-		return ErrEmptyCart
+		return ErrEmptyItems
 	}
 
 	for _, item := range r.Items {
@@ -37,13 +26,11 @@ func (r Response) Validate() error {
 		if item.Count < 1 {
 			return errors.WithMessage(ErrEmptyItemCount, suffix)
 		}
-		if len(item.Name) < 1 {
-			return errors.WithMessage(ErrEmptyItemName, suffix)
-		}
 	}
 
-	if r.TotalPrice < MinimumCost {
-		return ErrEmptyPrice
+	if r.User < 1 {
+		return ErrInvalidUser
 	}
+
 	return nil
 }

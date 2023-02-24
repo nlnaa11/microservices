@@ -10,9 +10,8 @@ import (
 const configPath = "data/config.yaml"
 
 type ConfigStruct struct {
-	token    string `yaml:"token"`
+	Token    string `yaml:"token"`
 	Services struct {
-		Loms    string `yaml:"loms"`
 		Product string `yaml:"product"`
 	} `yaml:"services"`
 }
@@ -31,8 +30,4 @@ func Init() error {
 	}
 
 	return nil
-}
-
-func (c ConfigStruct) GetToken() string {
-	return c.token
 }

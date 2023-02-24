@@ -7,6 +7,13 @@ import (
 	"net/http"
 )
 
+const (
+	ErrDecodingJson      = "decoding json"
+	ErrEncodingJson      = "encoding json"
+	ErrRunningHandler    = "running handler"
+	ErrValidatingRequest = "validating request"
+)
+
 type Validator interface {
 	Validate() error
 }

@@ -11,7 +11,7 @@ type OrderManager interface {
 }
 
 type ProductInformator interface {
-	GetProductInfo(ctx context.Context, sku uint32) (ItemInfo, error)
+	GetProductInfo(ctx context.Context, token string, sku uint32) (ItemInfo, error)
 }
 
 type Storage interface {
@@ -20,18 +20,25 @@ type Storage interface {
 	GetCart(ctx context.Context, user int64) (Cart, error)
 }
 
+type TokenGetter interface {
+	GetToken() string
+}
+
 type Model struct {
 	productInformator ProductInformator
 	logisticsManager  LogisticsManager
 	orderManager      OrderManager
 	stor              Storage
+	tokenGetter       TokenGetter
 }
 
-func New(prodInformator ProductInformator, logManager LogisticsManager, ordManager OrderManager, stor Storage) *Model {
+func New(prodInformator ProductInformator, logManager LogisticsManager,
+	ordManager OrderManager, stor Storage, tokenGetter TokenGetter) *Model {
 	return &Model{
 		productInformator: prodInformator,
 		logisticsManager:  logManager,
 		orderManager:      ordManager,
 		stor:              stor,
+		tokenGetter:       tokenGetter,
 	}
 }
