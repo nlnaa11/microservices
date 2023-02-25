@@ -7,7 +7,7 @@ type LogisticsManager interface {
 }
 
 type OrderManager interface {
-	CreateOrder(ctx context.Context, user int64, items []Item) (*Order, error)
+	CreateOrder(ctx context.Context, user int64, items []Item) (OrderInfo, error)
 }
 
 type ProductInformator interface {

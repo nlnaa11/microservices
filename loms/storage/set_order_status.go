@@ -3,26 +3,12 @@ package storage
 import (
 	"context"
 
-	"github.com/pkg/errors"
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
-var (
-	ErrUnknownOrderStatus = errors.New("unknown order status")
-)
-
-const (
-	StatusNew             = 0
-	StatusFailed          = 1
-	StatusAwaitingPayment = 2
-	StatusPayed           = 3
-	StatusCancelled       = 4
-	// вот это не очень
-	StatusCount = 5
-)
-
-func (s *WrapStorage) SetOrderStatus(ctx context.Context, orderId uint64, status uint16) error {
-	if status >= StatusCount {
-		return ErrUnknownOrderStatus
+func (s *WrapStorage) SetOrderStatus(ctx context.Context, orderId uint64, status string) error {
+	if status == StatusUnknown {
+		return errors.ErrUnknownOrderStatus
 	}
 
 	// проверка сущестования заказа внутри

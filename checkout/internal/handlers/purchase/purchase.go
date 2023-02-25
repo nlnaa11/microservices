@@ -2,14 +2,10 @@ package purchase
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/model"
-)
-
-var (
-	ErrInvalidOrder = errors.New("invalid order")
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
 type Handler struct {
@@ -27,8 +23,8 @@ type Request struct {
 }
 
 type Response struct {
-	OrderId int64
-	Status  uint16
+	OrderId int64  `json:"orderId"`
+	Status  string `json:"status"`
 }
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
@@ -40,8 +36,8 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	if err != nil {
 		return response, err
 	}
-	if rawResponse == nil || rawResponse.OrderId == -1 {
-		return response, ErrInvalidOrder
+	if rawResponse.Status == "unknown" || rawResponse.OrderId == 0 {
+		return response, errors.ErrInvalidOrder
 	}
 
 	response.OrderId = rawResponse.OrderId

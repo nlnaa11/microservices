@@ -20,7 +20,7 @@ func New(logic *model.Model) *Handler {
 type Request struct {
 	User  int64  `json:"user"`
 	Sku   uint32 `json:"sku"`
-	Count uint16 `json:"count"`
+	Count uint64 `json:"count"`
 }
 
 type Response struct {

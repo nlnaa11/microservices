@@ -6,27 +6,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	StatusNew             = 0
-	StatusFailed          = 1
-	StatusAwaitingPayment = 2
-)
-
 type OrderInfo struct {
 	OrderId uint64
-	Status  uint16
+	Status  string
 }
 
 func (m *Model) CreateOrder(ctx context.Context, user int64, items []Item) (OrderInfo, error) {
 	order := OrderInfo{
 		OrderId: 0,
-		Status:  StatusNew,
+		Status:  StatusNew.String(),
 	}
 
 	// 1. создать новый заказ в хранилище, получить идентификатор заказа
 	orderId, err := m.stor.CreateOrder(ctx, user, items)
 	if err != nil {
-		order.Status = StatusFailed
+		order.Status = StatusFailed.String()
 		return order, errors.WithMessage(err, "creating order")
 	}
 
@@ -37,19 +31,19 @@ func (m *Model) CreateOrder(ctx context.Context, user int64, items []Item) (Orde
 	// 2.2. Не удалось -- в статус failed
 	_, err = m.stor.ReserveItems(ctx, items)
 	if err != nil {
-		order.Status = StatusFailed
-		_ = m.stor.SetOrderStatus(ctx, orderId, StatusFailed)
+		order.Status = StatusFailed.String()
+		_ = m.stor.SetOrderStatus(ctx, orderId, StatusFailed.String())
 		return order, errors.WithMessage(err, "reserve items")
 	}
 
-	err = m.stor.SetOrderStatus(ctx, orderId, StatusAwaitingPayment)
+	err = m.stor.SetOrderStatus(ctx, orderId, StatusAwaitingPayment.String())
 	if err != nil {
 		// отменить резерв
 		_ = m.stor.RemoveFromReserve(ctx, items)
-		order.Status = StatusFailed
+		order.Status = StatusFailed.String()
 		return order, errors.WithMessage(err, "setting new status")
 	}
 
-	order.Status = StatusAwaitingPayment
+	order.Status = StatusAwaitingPayment.String()
 	return order, nil
 }

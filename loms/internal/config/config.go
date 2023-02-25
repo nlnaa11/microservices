@@ -7,10 +7,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const configPath = "data/config.yaml"
+const configPath = "config.yaml"
 
 type ConfigStruct struct {
 	Token    string `yaml:"token"`
+	Port     string `yaml:"port"`
 	Services struct {
 		Product string `yaml:"product"`
 	} `yaml:"services"`
@@ -30,4 +31,12 @@ func Init() error {
 	}
 
 	return nil
+}
+
+func (c ConfigStruct) GetToken() string {
+	return c.Token
+}
+
+func (c ConfigStruct) GetPort() string {
+	return c.Port
 }

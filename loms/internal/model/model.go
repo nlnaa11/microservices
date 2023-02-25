@@ -6,7 +6,7 @@ type Storage interface {
 	/** orders **/
 
 	CreateOrder(ctx context.Context, user int64, items []Item) (uint64, error)
-	SetOrderStatus(ctx context.Context, orderId uint64, status uint16) error
+	SetOrderStatus(ctx context.Context, orderId uint64, status string) error
 	GetOrderData(ctx context.Context, orderId uint64) (OrderData, error)
 
 	/** logistics **/

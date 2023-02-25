@@ -4,18 +4,23 @@ import (
 	"context"
 
 	"github.com/pkg/errors"
+	internalErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 	"gitlab.ozon.dev/nlnaa/homework-1/loms/internal/model"
 )
 
-func (s *WrapStorage) ReserveItems(ctx context.Context, items []model.Item) (map[uint32]uint64, error) {
-	if len(items) == 0 {
-		return nil, ErrEmptyItems
+// возвращает ошибку, если хотя бы по одному товару недостаток.
+// при ошибке также возвращает возможное количество тех товаров,
+// которых недостаточно для заказа.
+// если всех товаров достаточно, оба возвращаемых значения nil
+func (s *WrapStorage) ReserveItems(ctx context.Context, modelItems []model.Item) (map[uint32]uint64, error) {
+	if len(modelItems) == 0 {
+		return nil, internalErr.ErrEmptyItems
 	}
 
-	storItems := s.convertToStorItems(ctx, items)
+	items := s.convertToItems(ctx, modelItems)
 
 	// 1. Проверить запасы на складе (доступность)
-	inDeficit, err := s.checkAvailability(ctx, storItems)
+	inDeficit, err := s.checkAvailability(ctx, items)
 	if err != nil {
 		return inDeficit, errors.WithMessage(err, "checking stocks")
 	}
@@ -23,13 +28,12 @@ func (s *WrapStorage) ReserveItems(ctx context.Context, items []model.Item) (map
 		return inDeficit, errors.WithMessage(err, "deficits of items")
 	}
 
-	return nil, s.logisticsStor.AddToReserve(ctx, storItems)
+	return nil, s.logisticsStor.AddToReserve(ctx, items)
 }
 
 func (s *WrapStorage) checkAvailability(ctx context.Context, items []Item) (map[uint32]uint64, error) {
 	inDeficit := make(map[uint32]uint64)
 
-	// 1. проверить запасы
 	for _, item := range items {
 		stocks, err := s.logisticsStor.CheckStocks(ctx, item.Sku)
 		if err != nil {

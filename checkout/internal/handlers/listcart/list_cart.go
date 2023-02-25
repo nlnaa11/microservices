@@ -2,14 +2,10 @@ package listcart
 
 import (
 	"context"
-	"errors"
 	"log"
 
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/model"
-)
-
-var (
-	ErrEmptyList = errors.New("empty list of cart")
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
 type Handler struct {
@@ -28,7 +24,7 @@ type Request struct {
 
 type ItemInfo struct {
 	Sku   uint32  `json:"sku"`
-	Count uint16  `json:"count"`
+	Count uint64  `json:"count"`
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
 }
@@ -48,7 +44,7 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 		return response, err
 	}
 	if rawResponse == nil {
-		return response, ErrEmptyList
+		return response, errors.ErrEmptyListOfCart
 	}
 
 	response.Items = make([]ItemInfo, 0, len(rawResponse.ItemsInfo))

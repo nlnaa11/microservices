@@ -7,13 +7,6 @@ import (
 	"net/http"
 )
 
-const (
-	ErrDecodingJson      = "decoding json"
-	ErrEncodingJson      = "encoding json"
-	ErrRunningHandler    = "running handler"
-	ErrValidatingRequest = "validating request"
-)
-
 type Validator interface {
 	Validate() error
 }
@@ -34,25 +27,25 @@ func (w *Wrapper[Req, Res]) ServeHTTP(resWriter http.ResponseWriter, httpReq *ht
 	var request Req
 	err := json.NewDecoder(httpReq.Body).Decode(&request)
 	if err != nil {
-		processsError(resWriter, http.StatusBadRequest, ErrDecodingJson, err)
+		processsError(resWriter, http.StatusBadRequest, "decoding json", err)
 		return
 	}
 
 	err = request.Validate()
 	if err != nil {
-		processsError(resWriter, http.StatusBadRequest, ErrValidatingRequest, err)
+		processsError(resWriter, http.StatusBadRequest, "validating request", err)
 		return
 	}
 
 	response, err := w.fn(ctx, request)
 	if err != nil {
-		processsError(resWriter, http.StatusInternalServerError, ErrRunningHandler, err)
+		processsError(resWriter, http.StatusInternalServerError, "running handler", err)
 		return
 	}
 
 	rawJSON, err := json.Marshal(response)
 	if err != nil {
-		processsError(resWriter, http.StatusInternalServerError, ErrEncodingJson, err)
+		processsError(resWriter, http.StatusInternalServerError, "encoding json", err)
 		return
 	}
 

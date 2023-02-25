@@ -15,7 +15,7 @@ type LogisticsStorage interface {
 
 type OrderStorage interface {
 	CreateOrder(ctx context.Context, user int64, items []Item) (uint64, error)
-	SetOrderStatus(ctx context.Context, orderId uint64, status uint16) error
+	SetOrderStatus(ctx context.Context, orderId uint64, status string) error
 	// информация о coставе заказа и его статусе
 	GetOrderData(ctx context.Context, orderId uint64) (*OrderData, error)
 }

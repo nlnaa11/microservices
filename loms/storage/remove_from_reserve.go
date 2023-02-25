@@ -3,15 +3,17 @@ package storage
 import (
 	"context"
 
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 	"gitlab.ozon.dev/nlnaa/homework-1/loms/internal/model"
 )
 
-func (s *WrapStorage) RemoveFromReserve(ctx context.Context, items []model.Item) error {
-	if len(items) == 0 {
-		return ErrEmptyItems
+// удаляет товары из резерва в случае отмены заказа или при каком-л сбое
+func (s *WrapStorage) RemoveFromReserve(ctx context.Context, modelItems []model.Item) error {
+	if len(modelItems) == 0 {
+		return errors.ErrEmptyItems
 	}
 
-	storItems := s.convertToStorItems(ctx, items)
+	items := s.convertToItems(ctx, modelItems)
 
-	return s.logisticsStor.RemoveFromReserve(ctx, storItems)
+	return s.logisticsStor.RemoveFromReserve(ctx, items)
 }

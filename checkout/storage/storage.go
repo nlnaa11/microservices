@@ -1,9 +1,11 @@
 package storage
 
+import "context"
+
 type CartStorage interface {
-	AddTo(item Item, user int64, successChan chan bool)
-	RemoveFrom(item Item, user int64, successChan chan bool)
-	Get(user int64) (*Cart, error)
+	AddToCart(context context.Context, item Item, user int64) error
+	RemoveFromCart(ctx context.Context, item Item, user int64) error
+	GetAll(ctx context.Context, user int64) (*Cart, error)
 }
 
 type WrapStorage struct {

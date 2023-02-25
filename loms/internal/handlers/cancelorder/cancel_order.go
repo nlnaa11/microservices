@@ -36,6 +36,5 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 	}
 
 	response.Success = true
-
 	return response, nil
 }

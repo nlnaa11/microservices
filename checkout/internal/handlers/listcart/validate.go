@@ -4,46 +4,38 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
+	internalErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
-const MinimumCost = 1
-
-var (
-	ErrEmptyCart      = errors.New("empty cart")
-	ErrEmptyItemCount = errors.New("empty count")
-	ErrEmptyItemName  = errors.New("empty name")
-	ErrEmptyItemSku   = errors.New("empty sku")
-	ErrEmptyPrice     = errors.New("empty price")
-	ErrEmptyUser      = errors.New("empty user")
-)
+const minimumCost = 0.0
 
 func (r Request) Validate() error {
-	if r.User <= 0 {
-		return ErrEmptyUser
+	if r.User == 0 {
+		return internalErr.ErrInvalidUser
 	}
 	return nil
 }
 
 func (r Response) Validate() error {
 	if len(r.Items) < 1 {
-		return ErrEmptyCart
+		return internalErr.ErrEmptyCart
 	}
 
 	for _, item := range r.Items {
-		suffix := string("item sku: ") + strconv.Itoa(int(item.Sku))
+		suffix := string(" item sku: ") + strconv.Itoa(int(item.Sku))
 		if item.Sku == 0 {
-			return errors.WithMessage(ErrEmptyItemSku, suffix)
+			return errors.WithMessage(internalErr.ErrInvalidSku, suffix)
 		}
 		if item.Count < 1 {
-			return errors.WithMessage(ErrEmptyItemCount, suffix)
+			return errors.WithMessage(internalErr.ErrEmptyCount, suffix)
 		}
 		if len(item.Name) < 1 {
-			return errors.WithMessage(ErrEmptyItemName, suffix)
+			return errors.WithMessage(internalErr.ErrEmptyName, suffix)
 		}
 	}
 
-	if r.TotalPrice < MinimumCost {
-		return ErrEmptyPrice
+	if r.TotalPrice <= minimumCost {
+		return internalErr.ErrInvalidPrice
 	}
 	return nil
 }

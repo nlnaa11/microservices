@@ -1,22 +1,18 @@
 package deletefromcart
 
-import "errors"
-
-var (
-	ErrEmptyCount = errors.New("empty count")
-	ErrEmptyUser  = errors.New("empty user")
-	ErrEmptySKU   = errors.New("empty sku")
+import (
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
 func (r Request) Validate() error {
-	if r.User <= 0 {
-		return ErrEmptyUser
+	if r.User == 0 {
+		return errors.ErrInvalidUser
 	}
 	if r.Sku == 0 {
-		return ErrEmptySKU
+		return errors.ErrInvalidSku
 	}
 	if r.Count < 1 {
-		return ErrEmptyCount
+		return errors.ErrEmptyCount
 	}
 	return nil
 }

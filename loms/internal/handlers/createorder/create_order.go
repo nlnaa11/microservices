@@ -19,7 +19,7 @@ func New(logic *model.Model) *Handler {
 
 type RequestItem struct {
 	Sku   uint32 `json:"sku"`
-	Count uint16 `json:"count"`
+	Count uint64 `json:"count"`
 }
 
 type Request struct {
@@ -29,7 +29,7 @@ type Request struct {
 
 type Response struct {
 	OrderId uint64 `json:"orderId"`
-	Status  uint16 `json:"status"`
+	Status  string `json:"status"`
 }
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {

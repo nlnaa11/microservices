@@ -12,6 +12,7 @@ type Stock struct {
 	Count       uint64
 }
 
+// возврыщает информацию о наличии товара на разных складах в случае успеха
 func (s *WrapStorage) Stocks(ctx context.Context, sku uint32) ([]model.Stock, error) {
 	// 1. прошерстить все стоки в поисках товара
 	storStocks, err := s.logisticsStor.CheckStocks(ctx, sku)
@@ -19,20 +20,7 @@ func (s *WrapStorage) Stocks(ctx context.Context, sku uint32) ([]model.Stock, er
 		return nil, errors.WithMessage(err, "checking warehouses")
 	}
 
-	stocks := s.convertToStocks(ctx, storStocks)
+	stocks := s.convertToModelStocks(ctx, storStocks)
 
 	return stocks, nil
-}
-
-func (s *WrapStorage) convertToStocks(ctx context.Context, storStocks []Stock) []model.Stock {
-	stocks := make([]model.Stock, 0, len(storStocks))
-
-	for _, storStock := range storStocks {
-		stocks = append(stocks, model.Stock{
-			WarehouseId: storStock.WarehouseId,
-			Count:       storStock.Count,
-		})
-	}
-
-	return stocks
 }

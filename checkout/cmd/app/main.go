@@ -17,13 +17,6 @@ import (
 	"gitlab.ozon.dev/nlnaa/homework-1/libs/wrappers/server"
 )
 
-const (
-	port = ":8080"
-
-	ListeningHTTP      = "listening http at "
-	UnableToListenHTTP = "unable to listen to http"
-)
-
 func main() {
 	// storage
 	mem, err := memory.Init()
@@ -39,19 +32,19 @@ func main() {
 	}
 
 	// services: loms: logistics
-	logistics := loms.New(config.ConfigData.Services.Loms, loms.PathToStocks)
+	logistics := loms.New(config.ConfigData.Services.Loms)
 	if logistics == nil {
 		log.Fatal("failed to init logistics manager service")
 	}
 
 	// services: loms: order manager
-	orders := loms.New(config.ConfigData.Services.Loms, loms.PathToCreateOrder)
+	orders := loms.New(config.ConfigData.Services.Loms)
 	if orders == nil {
 		log.Fatal("failed to init order manager service")
 	}
 
 	// services: product
-	product := product.New(config.ConfigData.Services.Product, product.PathProducts)
+	product := product.New(config.ConfigData.Services.Product)
 	if product == nil {
 		log.Fatal("failed to init product service")
 	}
@@ -61,37 +54,24 @@ func main() {
 
 	// handlers: addToCart
 	addToCartHandler := addtocart.New(checkoutModel)
-
 	http.Handle("/addToCart", server.New(addToCartHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// handlers: deleteFromCart
 	deleteFromCartHandler := deletefromcart.New(checkoutModel)
-
 	http.Handle("/deleteFromCart", server.New(deleteFromCartHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// handlers: listCart
 	listCartHandler := listcart.New(checkoutModel)
-
 	http.Handle("/listCart", server.New(listCartHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// handlers: purchase
 	purchaseHandler := purchase.New(checkoutModel)
-
 	http.Handle("/purchase", server.New(purchaseHandler.Handle))
 
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
+	log.Println("listening http at ", config.ConfigData.GetPort())
+	err = http.ListenAndServe(config.ConfigData.GetPort(), nil)
+	if err != nil {
+		log.Fatal("listening and serve: ", err)
+	}
+	log.Fatal("unable to listen to http", err)
 }

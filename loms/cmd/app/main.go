@@ -17,13 +17,6 @@ import (
 	"gitlab.ozon.dev/nlnaa/homework-1/loms/storage/memory/ordermem"
 )
 
-const (
-	port = ":8081"
-
-	ListeningHTTP      = "listening http at "
-	UnableToListenHTTP = "unable to listen to http"
-)
-
 func main() {
 	// storages
 	logisticsMem, err := logisticsmem.Init()
@@ -49,46 +42,28 @@ func main() {
 
 	// handlers: stocks
 	stocksHandler := stocks.New(lomsModel)
-
 	http.Handle("/stocks", server.New(stocksHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	//handlers: createOrder
 	createOrderHandler := createorder.New(lomsModel)
-
 	http.Handle("/createOrder", server.New(createOrderHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// // handlers: listOrder
 	listOrderHandler := orderlist.New(lomsModel)
-
 	http.Handle("/listOrder", server.New(listOrderHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// handlers: orderPayed
 	orderPayedHandler := orderpayed.New(lomsModel)
-
 	http.Handle("/orderPayed", server.New(orderPayedHandler.Handle))
-
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
 
 	// handlers: cancelOrder
 	cancelOrderHandler := cancelorder.New(lomsModel)
-
 	http.Handle("/cancelOrder", server.New(cancelOrderHandler.Handle))
 
-	log.Println(ListeningHTTP, port)
-	err = http.ListenAndServe(port, nil)
-	log.Fatal(UnableToListenHTTP, err)
+	log.Println("listening http at ", config.ConfigData.GetPort())
+	err = http.ListenAndServe(config.ConfigData.GetPort(), nil)
+	if err != nil {
+		log.Fatal("listening and serve: ", err)
+	}
+	log.Fatal("unable to listen to http", err)
 }

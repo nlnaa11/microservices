@@ -8,42 +8,19 @@ import (
 )
 
 type OrderData struct {
-	Status uint16
+	Status string
 	User   int64
 	Items  []Item
 }
 
+// возвращает данные заказа, включая его статус, в случае успеха
 func (s *WrapStorage) GetOrderData(ctx context.Context, orderId uint64) (model.OrderData, error) {
-	storOrderData, err := s.orderStor.GetOrderData(ctx, orderId)
+	orderData, err := s.orderStor.GetOrderData(ctx, orderId)
 	if err != nil {
 		return model.OrderData{}, errors.WithMessage(err, "getting order data")
 	}
 
-	orderData := s.convertToOrderData(ctx, storOrderData)
+	modelOrderData := s.convertToModelOrderData(ctx, orderData)
 
-	return *orderData, nil
-}
-
-func (s *WrapStorage) convertToOrderData(ctx context.Context, storOrderData *OrderData) *model.OrderData {
-	items := s.convertToItems(ctx, storOrderData.Items)
-
-	return &model.OrderData{
-		Status: storOrderData.Status,
-		User:   storOrderData.User,
-		Items:  items,
-	}
-}
-
-// сюда бы дженерики
-func (s *WrapStorage) convertToItems(ctx context.Context, storItems []Item) []model.Item {
-	items := make([]model.Item, 0, len(storItems))
-
-	for _, storItem := range storItems {
-		items = append(items, model.Item{
-			Sku:   storItem.Sku,
-			Count: uint16(storItem.Count),
-		})
-	}
-
-	return items
+	return *modelOrderData, nil
 }

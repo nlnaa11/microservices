@@ -11,62 +11,47 @@ import (
 	"github.com/pkg/errors"
 )
 
-type RequestMaker interface {
-	MakeRequest() (any, error)
+type Validator interface {
+	Validate() error
 }
 
-type ResponseDataMaker interface {
-	MakeResponseData() (any, error)
+type Wrapper[Req any, Res any] struct {
+	urlPath string
 }
 
-type Wrapper[ReqData RequestMaker, Res ResponseDataMaker] struct {
-	path string
-}
-
-func New[ReqData RequestMaker, Res ResponseDataMaker](path string) *Wrapper[ReqData, Res] {
-	return &Wrapper[ReqData, Res]{
-		path: path,
+func New[Req any, Res any](path string) *Wrapper[Req, Res] {
+	return &Wrapper[Req, Res]{
+		urlPath: path,
 	}
 }
 
-func (w *Wrapper[ReqData, Res]) Service(ctx context.Context, reqData ReqData, path string) (any, error) {
-	var responseData any
+func (w *Wrapper[Req, Res]) Service(ctx context.Context, req Req) (Res, error) {
+	var response Res
 
-	request, err := reqData.MakeRequest()
+	rawJson, err := json.Marshal(req)
 	if err != nil {
-		return responseData, errors.Wrap(err, "converting data to request")
+		return response, errors.Wrap(err, "marshaling json")
 	}
 
-	rawJson, err := json.Marshal(request)
+	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, w.urlPath, bytes.NewBuffer(rawJson))
 	if err != nil {
-		return responseData, errors.Wrap(err, "marshaling json")
-	}
-
-	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, path, bytes.NewBuffer(rawJson))
-	if err != nil {
-		return responseData, errors.Wrap(err, "creating http request")
+		return response, errors.Wrap(err, "creating http request")
 	}
 
 	httpResponse, err := http.DefaultClient.Do(httpRequest)
 	if err != nil {
-		return responseData, errors.Wrap(err, "calling http")
+		return response, errors.Wrap(err, "calling http")
 	}
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return responseData, fmt.Errorf("wrong status code: %d", httpResponse.StatusCode)
+		return response, fmt.Errorf("wrong status code: %d", httpResponse.StatusCode)
 	}
 
-	var res Res
-	err = json.NewDecoder(httpResponse.Body).Decode(&res)
+	err = json.NewDecoder(httpResponse.Body).Decode(&response)
 	if err != nil {
-		return responseData, errors.Wrap(err, "decoding json")
+		return response, errors.Wrap(err, "decoding json")
 	}
 
-	responseData, err = res.MakeResponseData()
-	if err != nil {
-		return responseData, errors.Wrap(err, "converting response to data")
-	}
-
-	return responseData, nil
+	return response, nil
 }

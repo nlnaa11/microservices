@@ -5,16 +5,17 @@ import (
 	"log"
 
 	"github.com/pkg/errors"
+	internalErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
-var (
-	ErrEmpryCart = errors.New("empty cart")
-)
+type Item struct {
+	Sku   uint32 `json:"sku"`
+	Count uint64 `json:"count"`
+}
 
-// Item definition in add_to_cart.go
 type ItemInfo struct {
 	Sku   uint32  `json:"sku"`
-	Count uint16  `json:"count"`
+	Count uint64  `json:"count"`
 	Name  string  `json:"name"`
 	Price float64 `json:"price"`
 }
@@ -34,12 +35,12 @@ func (m *Model) ListCart(ctx context.Context, user int64) (*ListOfCart, error) {
 		return nil, errors.WithMessage(err, "getting cart")
 	}
 	if len(cart.Items) < 1 {
-		return nil, ErrEmpryCart
+		return nil, internalErr.ErrEmptyCart
 	}
 
 	token := m.tokenGetter.GetToken()
 
-	itemsInfo := make([]ItemInfo, len(cart.Items))
+	itemsInfo := make([]ItemInfo, 0, len(cart.Items))
 	totalPrice := 0.0
 
 	for _, item := range cart.Items {
@@ -47,7 +48,6 @@ func (m *Model) ListCart(ctx context.Context, user int64) (*ListOfCart, error) {
 		if err != nil {
 			log.Println(err)
 			_ = m.stor.RemoveFromCart(ctx, user, item)
-			//updateCart = true
 			continue
 		}
 
@@ -62,7 +62,7 @@ func (m *Model) ListCart(ctx context.Context, user int64) (*ListOfCart, error) {
 	}
 
 	if len(itemsInfo) < 1 {
-		return nil, ErrEmpryCart
+		return nil, internalErr.ErrEmptyCart
 	}
 
 	return &ListOfCart{

@@ -17,31 +17,23 @@ func New(logic *model.Model) *Handler {
 	}
 }
 
-const (
-	StatusNew             = 0
-	StatusFailed          = 1
-	StatusAwaitingPayment = 2
-	StatusPayed           = 3
-	StatusCancelled       = 4
-)
-
 type Request struct {
 	OrderId uint64 `json:"orderId"`
 }
 
 type ResponseItem struct {
 	Sku   uint32 `json:"sku"`
-	Count uint16 `json:"count"`
+	Count uint64 `json:"count"`
 }
 
 type Response struct {
-	Status uint16         `json:"status"`
+	Status string         `json:"status"`
 	User   int64          `json:"user"`
 	Items  []ResponseItem `json:"items"`
 }
 
 func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
-	log.Printf("odredList: %+v", req)
+	log.Printf("ordedList: %+v", req)
 
 	var response Response
 
@@ -57,7 +49,7 @@ func (h *Handler) Handle(ctx context.Context, req Request) (Response, error) {
 			Count: item.Count,
 		})
 	}
-	response.Status = list.Status
+	response.Status = list.Status.String()
 	response.User = list.User
 
 	return response, nil

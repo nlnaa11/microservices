@@ -1,19 +1,25 @@
 package loms
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"fmt"
-	"net/http"
 
-	"github.com/pkg/errors"
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/model"
+	"gitlab.ozon.dev/nlnaa/homework-1/libs/wrappers/client"
 )
 
 const (
-	PathToStocks string = "/stocks"
+	pathToStocks string = "/stocks"
 )
+
+type Client struct {
+	url string
+}
+
+func New(url string) *Client {
+	return &Client{
+		url: url,
+	}
+}
 
 type StocksRequest struct {
 	Sku uint32 `json:"sku"`
@@ -32,30 +38,11 @@ type StocksResponse struct {
 func (c *Client) Stocks(ctx context.Context, sku uint32) ([]model.Stock, error) {
 	request := StocksRequest{Sku: sku}
 
-	rawJSON, err := json.Marshal(request)
-	if err != nil {
-		return nil, errors.Wrap(err, "marshaling json")
-	}
+	clientWrapper := client.New[StocksRequest, StocksResponse](c.url + pathToStocks)
 
-	httpRequest, err := http.NewRequestWithContext(ctx, http.MethodPost, c.url+PathToStocks, bytes.NewBuffer(rawJSON))
+	response, err := clientWrapper.Service(ctx, request)
 	if err != nil {
-		return nil, errors.Wrap(err, "creating http request")
-	}
-
-	httpResponse, err := http.DefaultClient.Do(httpRequest)
-	if err != nil {
-		return nil, errors.Wrap(err, "calling http")
-	}
-	defer httpResponse.Body.Close()
-
-	if httpResponse.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("wrong status code: %d", httpResponse.StatusCode)
-	}
-
-	var response StocksResponse
-	err = json.NewDecoder(httpResponse.Body).Decode(&response)
-	if err != nil {
-		return nil, errors.Wrap(err, "decoding json")
+		return nil, err
 	}
 
 	stocks := make([]model.Stock, 0, len(response.Stocks))
