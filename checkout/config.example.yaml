@@ -1,0 +1,5 @@
+token:
+port: ":8080"
+services:
+    loms: "http://loms:8081"
+    product: "http://route256.pavl.uk:8080"
