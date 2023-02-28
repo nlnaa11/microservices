@@ -4,7 +4,7 @@ GOVER=$(shell go version | perl -nle '/(go\d\S+)/; print $$1;')
 SMARTIMPORTS=${BINDIR}/smartimports_${GOVER}
 LINTVER=v1.51.1
 LINTBIN=${BINDIR}/lint_${GOVER}_${LINTVER}
-PACKAGE=route256/loms/cmd/app
+PACKAGE=gitlab.ozon.dev/nlnaa/homework-1/loms/cmd/app
 
 all: format build test lint
 

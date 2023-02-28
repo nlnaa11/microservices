@@ -1,0 +1,4 @@
+token:
+port: ":8081"
+services:
+  product: "http://route256.pavl.uk:8080"
