@@ -14,10 +14,10 @@ type OrderData struct {
 }
 
 // возвращает данные заказа, включая его статус, в случае успеха
-func (s *WrapStorage) GetOrderData(ctx context.Context, orderId uint64) (model.OrderData, error) {
+func (s *WrapStorage) GetOrderData(ctx context.Context, orderId uint64) (model.OrderInfo, error) {
 	orderData, err := s.orderStor.GetOrderData(ctx, orderId)
 	if err != nil {
-		return model.OrderData{}, errors.WithMessage(err, "getting order data")
+		return model.OrderInfo{}, errors.WithMessage(err, "getting order data")
 	}
 
 	modelOrderData := s.convertToModelOrderData(ctx, orderData)

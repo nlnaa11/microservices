@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package checkout_v1;
+
+option go_package = "gitlab.ozon.dev/nlnaa/homework-1/checkout/pkg/checkout_v1;checkout_v1";
+
+import "google/protobuf/empty.proto";
+
+service CheckoutV1 {
+    rpc AddToCart (AddToCartRequest) returns (google.protobuf.Empty);
+    rpc DeleteFromCart (DeleteFromCartRequest) returns (google.protobuf.Empty);
+    rpc CartList (CartListRequest) returns (CartListResponse);
+    rpc Purchase (PurchaseRequest) returns (PurchaseResponse);
+}
+
+// common info
+
+message Item {
+    uint32 sku = 1; // == id
+    uint64 count = 2;
+}
+
+message ItemInfo {
+    Item item = 1;
+    double price = 2;
+    string name = 3;
+}
+
+// requests & responses
+
+message AddToCartRequest {
+    int64 user = 1;
+    Item item = 2;
+}
+
+message DeleteFromCartRequest {
+    int64 user = 1;
+    Item item = 2;
+}
+
+message CartListRequest {
+    int64 user = 1;
+}
+
+message CartListResponse {
+    repeated ItemInfo itemsInfo = 1;
+    double totalPrice = 2;
+}
+
+message PurchaseRequest {
+    int64 user = 1;
+}
+
+message PurchaseResponse {
+    int64 orderId = 1;
+    string status = 2;
+}

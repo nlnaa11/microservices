@@ -46,12 +46,15 @@ func (s *WrapStorage) convertToModelItems(ctx context.Context, items []Item) []m
 	return modelItems
 }
 
-func (s *WrapStorage) convertToModelOrderData(ctx context.Context, orderData *OrderData) *model.OrderData {
+func (s *WrapStorage) convertToModelOrderData(ctx context.Context, orderData *OrderData) *model.OrderInfo {
 	modelItems := s.convertToModelItems(ctx, orderData.Items)
 
-	return &model.OrderData{
-		Status: model.StatusFromString(orderData.Status),
-		User:   orderData.User,
-		Items:  modelItems,
+	return &model.OrderInfo{
+		Order: model.Order{
+			OrderId: 0,
+			Status:  orderData.Status,
+		},
+		User:  orderData.User,
+		Items: modelItems,
 	}
 }
