@@ -12,13 +12,13 @@ build: bindir
 	go build -o ${BINDIR}/app ${PACKAGE}
 
 test:
-	go test ./...
+	go test ./internal/...
 
 run:
 	go run ${PACKAGE}
 
 lint: install-lint
-	${LINTBIN} run
+	${LINTBIN} run --skip-dirs pgdata
 
 precommit: format build test lint
 	echo "OK"

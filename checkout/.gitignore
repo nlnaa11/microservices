@@ -1,3 +1,4 @@
 /bin
 config.yaml
 /vendor_proto
+/pgdata

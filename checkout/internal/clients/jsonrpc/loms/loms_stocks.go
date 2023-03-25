@@ -3,7 +3,7 @@ package loms
 import (
 	"context"
 
-	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/model"
+	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/app/model"
 	"gitlab.ozon.dev/nlnaa/homework-1/libs/wrappers/client"
 )
 

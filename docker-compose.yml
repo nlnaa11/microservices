@@ -1,18 +1,95 @@
 version: "3.1"
+
+networks:
+  net:
+    driver: bridge
+
 services:
+  # database for checkout
+  pgcheckout:
+    container_name: 'checkout-db-container'
+    image: postgres:15.1
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -q -U user -d checkout" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      POSTGRES_DB: checkout
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./checkout:/var/lib/postgresql/data
+    ports:
+     - 5432:5432
+    networks:
+      - net
+
+  # database for loms
+  pgloms:
+    container_name: 'loms_db_container'
+    image: postgres:15.1
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -q -U user -d loms" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+    restart: always
+    environment:
+      POSTGRES_DB: loms
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./loms:/var/lib/postgresql/data
+    ports:
+     - 5433:5432
+    networks:
+      - net
+      
+  # checkout service
   checkout:
+    container_name: 'checkout_container'
     image: checkout
     build: ./checkout/
+    restart: on-failure
+    # environment:
+    #   DATABASE_URL: pgcheckout://postgres:postgres@pgcheckout:5432/checkout?sslmode=disable
     ports:
-      - "8080:8080"
-      - "8082:8082"
+      - 8080:8080
+      - 8082:8082
+    depends_on:
+      pgcheckout:
+        condition: service_healthy
+    networks:
+      - net
+    volumes:
+      - ./checkout/migrations:/root/migrations
+      - ./checkout/config.yaml:/root/config.yaml
+
+  # loms service
   loms:
+    container_name: 'loms_container'
     image: loms
     build: ./loms/
+    restart: on-failure
+    # environment:
+    #   DATABASE_URL: pgloms://postgres:postgres@pgloms:5433/loms?sslmode=disable
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - 8081:8081
+    depends_on:
+       pgloms:
+         condition: service_healthy
+    networks:
+      - net
+    volumes:
+      - ./loms/migrations:/root/mogrations
+      - ./loms/config.yaml:/root/config.yaml
+
   # notification:
+  #   container_name: 'notification_container'
   #   image: notification
   #   build: ./notification
   #   ports:

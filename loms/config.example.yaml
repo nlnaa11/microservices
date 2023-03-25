@@ -1,3 +1,7 @@
 host_name: localhost
 http_port: 8080
 grpc_port: 8081
+db:
+# for test: dsn: "host=localhost port=5433 dbname=loms user=user password=password sslmode=disable"
+    dsn: "host=pgloms port=5433 dbname=loms user=user password=password sslmode=disable"
+    max_open_connections: 10

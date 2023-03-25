@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -19,18 +20,26 @@ type ServiceInfo struct {
 	Port     int    `yaml:"port"`
 }
 
-type ConfigStruct struct {
+type DBInfo struct {
+	DSN                string `yaml:"dsn"`
+	MaxOpenConnections int32  `yaml:"max_open_connections"`
+}
+
+type ConfigData struct {
 	ProductToken string `yaml:"product_token"`
 	HostName     string `yaml:"host_name"`
 	HttpPort     int    `yaml:"http_port"`
 	GrpcPort     int    `yaml:"grpc_port"`
-	Services     struct {
+
+	Services struct {
 		Loms    ServiceInfo `yaml:"loms"`
 		Product ServiceInfo `yaml:"product"`
 	} `yaml:"services"`
+
+	DB DBInfo `yaml:"db"`
 }
 
-var ConfigData ConfigStruct
+var Data ConfigData
 
 func Init() error {
 	rawYAML, err := os.ReadFile(configPath)
@@ -38,7 +47,7 @@ func Init() error {
 		return errors.WithMessage(err, "reading config file")
 	}
 
-	err = yaml.Unmarshal(rawYAML, &ConfigData)
+	err = yaml.Unmarshal(rawYAML, &Data)
 	if err != nil {
 		return errors.WithMessage(err, "parsing yaml")
 	}
@@ -46,7 +55,7 @@ func Init() error {
 	return nil
 }
 
-func (c ConfigStruct) GetToken() string {
+func (c *ConfigData) GetToken() string {
 	return c.ProductToken
 }
 
@@ -57,7 +66,7 @@ const (
 	GRPC
 )
 
-func (c ConfigStruct) GetCommunicationAddress(communication Communication) string {
+func (c *ConfigData) GetCommunicationAddress(communication Communication) string {
 	switch communication {
 	case HTTP:
 		return fmt.Sprintf("%s:%d", c.HostName, c.HttpPort)
@@ -75,7 +84,7 @@ const (
 	Product
 )
 
-func (c ConfigStruct) GetServiceAddress(service Service) string {
+func (c *ConfigData) GetServiceAddress(service Service) string {
 	switch service {
 	case Loms:
 		return fmt.Sprintf("%s:%d", c.Services.Loms.HostName, c.Services.Loms.Port)
@@ -84,4 +93,17 @@ func (c ConfigStruct) GetServiceAddress(service Service) string {
 	default:
 		return ""
 	}
+}
+
+func (c *ConfigData) GetDBConfig() (*pgxpool.Config, error) {
+	poolConfig, err := pgxpool.ParseConfig(c.DB.DSN)
+	if err != nil {
+		return nil, err
+	}
+
+	poolConfig.ConnConfig.BuildStatementCache = nil
+	poolConfig.ConnConfig.PreferSimpleProtocol = true
+	poolConfig.MaxConns = c.DB.MaxOpenConnections
+
+	return poolConfig, nil
 }

@@ -9,3 +9,7 @@ services:
     product:
         host_name: route256.pavl.uk
         port: 8080
+db:
+# for test: dsn: "host=localhost port=5432 dbname=checkout user=user password=password sslmode=disable"
+    dsn: "host=pgcheckout port=5432 dbname=checkout user=user password=password sslmode=disable"
+    max_open_connections: 10
