@@ -18,9 +18,9 @@ build: bindir
 	go build -o ${BINDIR}/app ${PACKAGE}
 
 test:
-	go test ./...
+	go test ./internal/... ./pkg/...
 
-run:
+run: build
 	go run ${PACKAGE}
 
 generate-checkoutv1:
@@ -56,7 +56,7 @@ generate-protoc: install-protoc install-protoc-grpc get-protoc-deps vendor-proto
 	generate-checkoutv1 generate-lomsv1 generate-product
 
 lint: install-lint
-	${LINTBIN} run
+	${LINTBIN} run --skip-dirs pgdata/
 
 precommit: format build test lint
 	echo "OK"

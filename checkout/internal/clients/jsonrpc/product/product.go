@@ -3,7 +3,7 @@ package product
 import (
 	"context"
 
-	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/model"
+	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/app/model"
 	"gitlab.ozon.dev/nlnaa/homework-1/libs/wrappers/client"
 )
 
@@ -49,8 +49,10 @@ func (c *Client) GetProductInfo(ctx context.Context, token string, sku uint32) (
 	}
 
 	return model.ItemInfo{
-		Sku:   response.Sku,
-		Count: response.Count,
+		Item: model.Item{
+			Sku:   response.Sku,
+			Count: response.Count,
+		},
 		Name:  response.Name,
 		Price: response.Price,
 	}, nil

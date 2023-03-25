@@ -8,6 +8,7 @@ run-all: build-all
 	sudo docker compose up --force-recreate --build
 
 precommit:
+
 	cd checkout && make precommit
 	cd loms && make precommit
 	cd notifications && make precommit

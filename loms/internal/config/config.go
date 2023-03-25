@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v3"
 )
@@ -14,13 +15,20 @@ const (
 	defaultPort = 8080
 )
 
-type ConfigStruct struct {
+type DBInfo struct {
+	DSN                string `yaml:"dsn"`
+	MaxOpenConnections int32  `yaml:"max_open_connections"`
+}
+
+type ConfigData struct {
 	HostName string `yaml:"host_name"`
 	HttpPort int    `yaml:"http_port"`
 	GrpcPort int    `yaml:"grpc_port"`
+
+	DB DBInfo `yaml:"db"`
 }
 
-var ConfigData ConfigStruct
+var Data ConfigData
 
 func Init() error {
 	rawYAML, err := os.ReadFile(configPath)
@@ -28,7 +36,7 @@ func Init() error {
 		return errors.WithMessage(err, "reading config file")
 	}
 
-	err = yaml.Unmarshal(rawYAML, &ConfigData)
+	err = yaml.Unmarshal(rawYAML, &Data)
 	if err != nil {
 		return errors.WithMessage(err, "parsing yaml")
 	}
@@ -43,7 +51,7 @@ const (
 	GRPC
 )
 
-func (c ConfigStruct) GetCommunicationAddress(Communication Communication) string {
+func (c *ConfigData) GetCommunicationAddress(Communication Communication) string {
 	switch Communication {
 	case HTTP:
 		return fmt.Sprintf("%s:%d", c.HostName, c.HttpPort)
@@ -52,4 +60,17 @@ func (c ConfigStruct) GetCommunicationAddress(Communication Communication) strin
 	default:
 		return fmt.Sprintf("%s:%d", c.HostName, defaultPort)
 	}
+}
+
+func (c *ConfigData) GetDBConfig() (*pgxpool.Config, error) {
+	poolConfig, err := pgxpool.ParseConfig(c.DB.DSN)
+	if err != nil {
+		return nil, err
+	}
+
+	poolConfig.ConnConfig.BuildStatementCache = nil
+	poolConfig.ConnConfig.PreferSimpleProtocol = true
+	poolConfig.MaxConns = c.DB.MaxOpenConnections
+
+	return poolConfig, nil
 }
