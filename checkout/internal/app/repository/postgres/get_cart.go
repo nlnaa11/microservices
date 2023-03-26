@@ -9,6 +9,7 @@ import (
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/app/repository/postgres/schema"
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/app/repository/postgres/table"
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/clients/db"
+	libErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
 func (r *repository) GetCart(ctx context.Context, userId int64) (model.Cart, error) {
@@ -33,6 +34,9 @@ func (r *repository) GetCart(ctx context.Context, userId int64) (model.Cart, err
 	var items []schema.Item
 	if err := r.db.DB().Select(ctx, &items, q, args...); err != nil {
 		return cart, err
+	}
+	if len(items) == 0 {
+		return cart, libErr.ErrEmptyCart
 	}
 
 	cart.Items = convert.ToModelItems(items)

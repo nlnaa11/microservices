@@ -6,7 +6,6 @@ import (
 
 	"github.com/pkg/errors"
 	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/app/model"
-	internalErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
 func (s *Service) CartList(ctx context.Context, user int64) (model.CartList, error) {
@@ -17,9 +16,6 @@ func (s *Service) CartList(ctx context.Context, user int64) (model.CartList, err
 	cart, err := s.cartsRepo.GetCart(ctx, user)
 	if err != nil {
 		return cartList, errors.WithMessage(err, "getting cart")
-	}
-	if len(cart.Items) == 0 {
-		return cartList, internalErr.ErrEmptyCart
 	}
 
 	cartList.ItemsInfo = make([]model.ItemInfo, 0, len(cart.Items))

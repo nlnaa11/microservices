@@ -32,3 +32,11 @@ var (
 
 	ErrUnknownOrderStatus = errors.New("unknown order status")
 )
+
+// for workerPool
+var (
+	ErrNoWorkers          = errors.New("no workers")
+	ErrInvalidTasksBuffer = errors.New("invalid tasks buffer")
+
+	ErrInvalidTaskFunction = errors.New("invalid task function")
+)
