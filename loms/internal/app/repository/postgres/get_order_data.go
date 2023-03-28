@@ -37,6 +37,18 @@ func (r *repository) GetOrderData(ctx context.Context, orderId uint64) (*model.O
 	return orderData, nil
 }
 
+func (r *repository) GetOrderInfo(ctx context.Context, orderId uint64) (*model.Order, error) {
+	order, err := r.getOrderInfo(ctx, orderId)
+	if err != nil {
+		return nil, errors.WithMessage(err, "getting order info")
+	}
+
+	return &model.Order{
+		OrderId: order.Id,
+		Status:  order.Status.String(),
+	}, nil
+}
+
 func (r *repository) getOrderInfo(ctx context.Context, orderId uint64) (*schema.Order, error) {
 	builder := sq.Select(
 		"order_id", "status").

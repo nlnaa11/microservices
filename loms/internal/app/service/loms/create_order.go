@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/pkg/errors"
 	libErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
@@ -32,6 +33,11 @@ func (s *Service) CreateOrder(ctx context.Context, user int64, items []model.Ite
 		return order, errors.WithMessage(err, "creating order")
 	}
 
+	// order -- не какая-то постоянная сущность, поэтому можем передать только id
+	// для отслеживания статуса
+	// мы не будем ждать завершения. Обрабатывать ошибку нужно др способом
+	go s.cancelByTimeout(ctx, orderId)
+
 	for _, item := range items {
 		// 1. Проверить запасы: стоки - резерв
 		// 2. Оценить запасы: [резервация и ожидание оплаты] || отмена оплаты
@@ -58,6 +64,28 @@ func (s *Service) CreateOrder(ctx context.Context, user int64, items []model.Ite
 	_ = s.ordersRepo.SetOrderStatus(ctx, orderId, model.StatusAwaitingPayment.String())
 
 	return order, nil
+}
+
+// если честно, создавать для каждого заказа свою горутину и свой таймер --
+// по-моему, это чересчур
+// зато просто)
+func (s *Service) cancelByTimeout(ctx context.Context, orderId uint64) {
+	defer func() {
+		fmt.Println("cancelByTimeout completed")
+	}()
+
+	timer := time.NewTimer(10 * time.Minute)
+
+	select {
+	case <-ctx.Done():
+		log.Println("something was wrong")
+		return
+	case <-timer.C:
+		order, _ := s.ordersRepo.GetOrderInfo(ctx, orderId)
+		if order.Status == model.StatusAwaitingPayment.String() {
+			_ = s.CancelOrder(ctx, order.OrderId)
+		}
+	}
 }
 
 // NB: часть уже былa написана, зачем добру пропадать

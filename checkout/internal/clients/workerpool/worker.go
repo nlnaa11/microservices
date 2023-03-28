@@ -4,9 +4,11 @@ import (
 	"context"
 	"log"
 	"sync"
+
+	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/clients/workerpool/task"
 )
 
-func worker(ctx context.Context, wg *sync.WaitGroup, tasks <-chan Task, results chan<- Result) {
+func worker(ctx context.Context, wg *sync.WaitGroup, tasks <-chan task.Task, results chan<- task.Result) {
 	defer wg.Done()
 
 	for {

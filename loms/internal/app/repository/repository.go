@@ -23,4 +23,6 @@ type OrdersRepository interface {
 	GetOrderData(ctx context.Context, orderId uint64) (*model.OrderInfo, error)
 	// информация только о составе заказа
 	GetOrderItems(ctx context.Context, orderId uint64) ([]model.Item, error)
+	// информация о статусе заказа
+	GetOrderInfo(ctx context.Context, orderId uint64) (*model.Order, error)
 }

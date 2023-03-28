@@ -1,31 +1,42 @@
+// worker pool локальный. Создается по месту необходимости.
+// Сразу получает все задачи на выполнение (срез tasks),
+// которые ставит "в очередь" (tasksBuffer) для выполнения
+// ограниченным числом рабочих (workersCount вызовов go worker(...))
+
+// т.к. воркер пул локальный, после выполнения им всех задач
+// переиспользовать его нельзя. Нужно создавать новый(
+
+// для чтения результатов возвращает канал на чтение с результатами
+
 package workerpool
 
 import (
 	"context"
 	"sync"
 
+	"gitlab.ozon.dev/nlnaa/homework-1/checkout/internal/clients/workerpool/task"
 	libErr "gitlab.ozon.dev/nlnaa/homework-1/libs/errors"
 )
 
-type Pool interface {
+type WorkerPool interface {
 	Start(ctx context.Context)
-	Results() <-chan Result
+	Results() <-chan task.Result
 }
 
-var _ Pool = (*pool)(nil)
+var _ WorkerPool = (*pool)(nil)
 
 type pool struct {
 	workersCount int
 
-	tasks []Task
+	tasks []task.Task
 
 	// tasksBuffer to execute
-	tasksBuffer chan Task
+	tasksBuffer chan task.Task
 	// results after completing tasks
-	results chan Result
+	results chan task.Result
 }
 
-func New(tasks []Task, workersCount int, tasksBufferSize int) (Pool, error) {
+func New(tasks []task.Task, workersCount int, tasksBufferSize int) (WorkerPool, error) {
 	if workersCount < 1 {
 		return nil, libErr.ErrNoWorkers
 	}
@@ -33,8 +44,8 @@ func New(tasks []Task, workersCount int, tasksBufferSize int) (Pool, error) {
 		return nil, libErr.ErrInvalidTasksBuffer
 	}
 
-	tasksBuffer := make(chan Task, tasksBufferSize)
-	results := make(chan Result, workersCount)
+	tasksBuffer := make(chan task.Task, tasksBufferSize)
+	results := make(chan task.Result, workersCount)
 
 	return &pool{
 		workersCount: workersCount,
@@ -47,18 +58,6 @@ func New(tasks []Task, workersCount int, tasksBufferSize int) (Pool, error) {
 func (p *pool) Start(ctx context.Context) {
 	var wg sync.WaitGroup
 
-	defer func() {
-		// will close when all tasks flow into the tasks buffer
-		// [from tasks to tasksBuffer]
-		close(p.tasksBuffer)
-
-		// wait for completion of all tasks from the buffer
-		wg.Wait()
-
-		// will close when all results are received
-		close(p.results)
-	}()
-
 	// run workers
 	for i := 0; i < p.workersCount; i++ {
 		wg.Add(1)
@@ -70,8 +69,17 @@ func (p *pool) Start(ctx context.Context) {
 	for _, task := range p.tasks {
 		p.tasksBuffer <- task
 	}
+
+	// will close when all tasks flow into the tasks buffer
+	close(p.tasksBuffer)
+
+	// wait for completion of all tasks from the buffer
+	wg.Wait()
+
+	// will close when all results are received
+	close(p.results)
 }
 
-func (p *pool) Results() <-chan Result {
+func (p *pool) Results() <-chan task.Result {
 	return p.results
 }
