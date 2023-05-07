@@ -7,7 +7,6 @@ import (
 	productServiceApi "gitlab.ozon.dev/nlnaa/homework-1/checkout/pkg/product"
 )
 
-// TODO: сходить в productService.GetProductInfo, чтобы узнать цены и названия товаров
 func (i *Implementation) CartList(ctx context.Context, req *desc.CartListRequest) (*desc.CartListResponse, error) {
 	// 1. получить корзину пользователя
 	cartList, err := i.checkoutService.CartList(ctx, req.GetUser())
